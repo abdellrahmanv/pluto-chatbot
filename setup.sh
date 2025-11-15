@@ -56,6 +56,7 @@ sudo apt-get install -y \
 
 echo ""
 echo -e "${GREEN}Step 5: Creating Python virtual environment...${NC}"
+cd ~/pluto-chatbot
 python3 -m venv venv
 source venv/bin/activate
 
@@ -65,12 +66,18 @@ pip install --upgrade pip setuptools wheel
 
 echo ""
 echo -e "${GREEN}Step 7: Installing Python packages...${NC}"
+echo "This may take 10-15 minutes on Raspberry Pi..."
 pip install \
     openai-whisper \
     PyYAML \
     pyaudio \
     numpy \
     scipy
+
+# Verify Whisper installation
+echo ""
+echo "Verifying Whisper installation..."
+python3 -c "import whisper; print(f'Whisper version: {whisper.__version__}')" || echo "Warning: Whisper import failed"
 
 echo ""
 echo -e "${GREEN}Step 8: Installing Piper TTS...${NC}"
