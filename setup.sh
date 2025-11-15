@@ -56,9 +56,13 @@ sudo apt-get install -y \
 
 echo ""
 echo -e "${GREEN}Step 5: Creating Python virtual environment...${NC}"
-cd ~/pluto-chatbot
+# Get the directory where this script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$SCRIPT_DIR"
+echo "Working in: $SCRIPT_DIR"
 python3 -m venv venv
 source venv/bin/activate
+echo "Virtual environment activated"
 
 echo ""
 echo -e "${GREEN}Step 6: Upgrading pip...${NC}"
@@ -155,7 +159,7 @@ echo "You can test the microphone with: arecord -D hw:3 -f cd -d 5 test.wav"
 
 echo ""
 echo -e "${GREEN}Step 12: Creating logs directory...${NC}"
-cd ~/pluto-chatbot  # Assumes setup script is run from project directory
+cd "$SCRIPT_DIR"
 mkdir -p logs
 mkdir -p temp
 
@@ -164,15 +168,20 @@ echo "=========================================="
 echo -e "${GREEN}✓ Setup Complete!${NC}"
 echo "=========================================="
 echo ""
+echo "Installation directory: $SCRIPT_DIR"
+echo ""
 echo "To start using Pluto:"
-echo "  1. Activate virtual environment:"
+echo "  1. Go to project directory:"
+echo "     cd $SCRIPT_DIR"
+echo ""
+echo "  2. Activate virtual environment:"
 echo "     source venv/bin/activate"
 echo ""
-echo "  2. Run Pluto:"
+echo "  3. Run Pluto:"
 echo "     python3 main.py"
 echo ""
-echo "  3. To auto-start on boot, add to crontab:"
-echo "     @reboot cd ~/pluto-chatbot && source venv/bin/activate && python3 main.py"
+echo "  4. To auto-start on boot, add to crontab:"
+echo "     @reboot cd $SCRIPT_DIR && source venv/bin/activate && python3 main.py"
 echo ""
 echo -e "${YELLOW}Note: Make sure your USB audio device is connected to Raspberry Pi!${NC}"
 echo ""
