@@ -1,0 +1,65 @@
+# Pluto Chatbot Configuration
+
+# Audio Device Settings
+audio:
+  device_name: "USB Audio Device"  # Name of your USB audio adapter
+  card_index: 3                     # ALSA card index (Card 3)
+  sample_rate: 16000                # Sample rate for recording (Whisper works best with 16kHz)
+  channels: 1                       # Mono audio
+  chunk_size: 1024                  # Audio buffer size
+  record_seconds: 5                 # Duration to record for each voice command
+  silence_threshold: 500            # Amplitude threshold to detect silence
+  silence_duration: 2.0             # Seconds of silence before stopping recording
+
+# Whisper STT Settings
+whisper:
+  model_size: "base"                # Options: tiny, base, small, medium, large
+  language: "en"                    # Language code
+  device: "cpu"                     # Use "cpu" for Raspberry Pi (or "cuda" if you have GPU)
+
+# Piper TTS Settings
+piper:
+  model_path: "/home/pi/piper/models/en_US-lessac-medium.onnx"  # Path to Piper voice model
+  config_path: "/home/pi/piper/models/en_US-lessac-medium.onnx.json"
+  speaker_id: 0                     # Speaker ID for multi-speaker models
+  noise_scale: 0.667                # Variability in speech
+  length_scale: 1.0                 # Speech speed (1.0 = normal, <1.0 = faster, >1.0 = slower)
+
+# Intent Detection Keywords
+intents:
+  greeting:
+    keywords:
+      - "hey"
+      - "hi"
+      - "hello"
+      - "greetings"
+      - "good morning"
+      - "good afternoon"
+      - "good evening"
+  
+  fun_fact:
+    keywords:
+      - "fun fact"
+      - "tell me something"
+      - "give me a fact"
+      - "something interesting"
+      - "tell me a fact"
+      - "interesting fact"
+      - "random fact"
+
+# Response Templates
+responses:
+  greeting: "Hey, I'm Pluto — an AI-powered welcoming robot. How can I assist you today?"
+  
+  fallback: "I didn't catch that. You can say 'fun fact' if you want to hear something interesting!"
+  
+  startup: "Hello! I'm Pluto, your AI assistant. I'm ready to chat!"
+  
+  shutdown: "Goodbye! See you next time!"
+
+# System Settings
+system:
+  log_level: "INFO"                 # Logging level: DEBUG, INFO, WARNING, ERROR
+  log_file: "logs/pluto.log"        # Log file path
+  temp_audio_dir: "temp/"           # Directory for temporary audio files
+  enable_humanization: true         # Enable post-processing to make responses more natural

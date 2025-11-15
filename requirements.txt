@@ -1,0 +1,20 @@
+# Python Dependencies for Pluto Chatbot
+
+# Core ML/AI
+openai-whisper>=20231117
+torch>=2.0.0
+
+# Audio Processing
+PyAudio>=0.2.13
+numpy>=1.24.0
+scipy>=1.10.0
+
+# Configuration
+PyYAML>=6.0
+
+# Utilities
+setuptools>=65.0.0
+wheel>=0.40.0
+
+# Note: Piper TTS is installed separately via setup.sh
+# It's not a Python package but a standalone binary
