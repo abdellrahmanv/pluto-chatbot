@@ -26,12 +26,12 @@ echo "Creating systemd service file..."
 sudo tee /etc/systemd/system/pluto.service > /dev/null << EOF
 [Unit]
 Description=Pluto Chatbot Auto-Start
-After=network.target sound.target alsa-restore.service
+After=network.target sound.target alsa-restore.service systemd-udev-settle.service
 Wants=sound.target
 
 [Service]
 Type=simple
-ExecStartPre=/bin/sleep 10
+ExecStartPre=/bin/sleep 15
 ExecStart=/bin/bash -c "cd $SCRIPT_DIR && ./run_pluto.sh"
 WorkingDirectory=$SCRIPT_DIR
 Restart=on-failure

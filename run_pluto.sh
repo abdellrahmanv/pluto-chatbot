@@ -31,10 +31,28 @@ echo "Activating virtual environment..."
 source venv/bin/activate
 
 # Wait for audio devices to be ready (especially important on boot)
-echo "Checking audio devices..."
-sleep 2
+echo "Waiting for audio devices to be ready..."
+MAX_WAIT=60
+WAIT_COUNT=0
+
+while [ $WAIT_COUNT -lt $MAX_WAIT ]; do
+    # Check if card 3 exists
+    if aplay -l 2>/dev/null | grep -q "card 3"; then
+        echo "✓ Audio device Card 3 found!"
+        break
+    fi
+    
+    echo "Waiting for audio device... ($WAIT_COUNT/$MAX_WAIT)"
+    sleep 2
+    WAIT_COUNT=$((WAIT_COUNT + 2))
+done
+
+if [ $WAIT_COUNT -ge $MAX_WAIT ]; then
+    echo "⚠️ Warning: Audio device Card 3 not found after ${MAX_WAIT}s, attempting to continue..."
+fi
 
 # List available audio devices
+echo ""
 echo "Available audio devices:"
 aplay -l 2>/dev/null || echo "Warning: Could not list audio devices"
 echo ""

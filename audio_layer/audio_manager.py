@@ -123,14 +123,28 @@ class AudioManager:
             )
         except Exception as e:
             self.logger.error(f"Failed to open audio stream: {e}")
-            self.logger.info("Trying with default device...")
-            stream = self.audio.open(
-                format=pyaudio.paInt16,
-                channels=self.channels,
-                rate=self.sample_rate,
-                input=True,
-                frames_per_buffer=self.chunk_size
-            )
+            self.logger.info("Trying with stereo (2 channels) instead of mono...")
+            try:
+                # Try stereo if mono fails
+                stream = self.audio.open(
+                    format=pyaudio.paInt16,
+                    channels=2,  # Try stereo
+                    rate=self.sample_rate,
+                    input=True,
+                    input_device_index=self.device_index,
+                    frames_per_buffer=self.chunk_size
+                )
+                self.logger.info("✓ Recording with stereo")
+            except Exception as e2:
+                self.logger.error(f"Stereo also failed: {e2}")
+                self.logger.info("Trying default device with default settings...")
+                stream = self.audio.open(
+                    format=pyaudio.paInt16,
+                    channels=1,
+                    rate=44100,  # Try CD quality rate
+                    input=True,
+                    frames_per_buffer=self.chunk_size
+                )
         
         self.logger.info("Recording started...")
         
@@ -200,9 +214,25 @@ class AudioManager:
         """Play audio file through speakers"""
         import subprocess
         
-        # Try using aplay directly (more reliable on Raspberry Pi)
+        # Try using aplay with explicit device
         try:
-            self.logger.info(f"Playing audio with aplay: {filepath}")
+            self.logger.info(f"Playing audio with aplay on Card {self.card_index}: {filepath}")
+            result = subprocess.run(
+                ['aplay', '-D', f'plughw:{self.card_index},0', filepath],
+                capture_output=True,
+                timeout=30
+            )
+            if result.returncode == 0:
+                self.logger.info("Playback finished")
+                return
+            else:
+                self.logger.warning(f"aplay on Card {self.card_index} failed: {result.stderr.decode()}")
+        except Exception as e:
+            self.logger.warning(f"aplay with explicit device failed: {e}")
+        
+        # Try default aplay
+        try:
+            self.logger.info(f"Playing audio with aplay (default): {filepath}")
             result = subprocess.run(
                 ['aplay', filepath],
                 capture_output=True,
