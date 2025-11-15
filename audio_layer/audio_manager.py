@@ -174,9 +174,9 @@ class AudioManager:
                         self.logger.info("Silence detected, stopping recording")
                         break
                 
-                # Safety limit: max 30 seconds
-                if len(frames) > self.sample_rate / self.chunk_size * 30:
-                    self.logger.warning("Maximum recording time reached")
+                # Safety limit: max 4.5 seconds
+                if len(frames) > self.sample_rate / self.chunk_size * 4.5:
+                    self.logger.info("Maximum recording time (4.5s) reached")
                     break
         
         stream.stop_stream()
