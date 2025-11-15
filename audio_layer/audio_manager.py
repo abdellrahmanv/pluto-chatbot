@@ -185,6 +185,25 @@ class AudioManager:
     
     def play_audio(self, filepath: str):
         """Play audio file through speakers"""
+        import subprocess
+        
+        # Try using aplay directly (more reliable on Raspberry Pi)
+        try:
+            self.logger.info(f"Playing audio with aplay: {filepath}")
+            result = subprocess.run(
+                ['aplay', filepath],
+                capture_output=True,
+                timeout=30
+            )
+            if result.returncode == 0:
+                self.logger.info("Playback finished")
+                return
+            else:
+                self.logger.warning(f"aplay failed: {result.stderr.decode()}")
+        except Exception as e:
+            self.logger.warning(f"aplay not available: {e}")
+        
+        # Fallback to PyAudio
         try:
             with wave.open(filepath, 'rb') as wf:
                 # Get file parameters
@@ -192,7 +211,7 @@ class AudioManager:
                 file_rate = wf.getframerate()
                 file_width = wf.getsampwidth()
                 
-                self.logger.info(f"Playing audio: {filepath} (channels: {file_channels}, rate: {file_rate})")
+                self.logger.info(f"Playing audio with PyAudio: {filepath} (channels: {file_channels}, rate: {file_rate})")
                 
                 try:
                     stream = self.audio.open(
@@ -211,8 +230,6 @@ class AudioManager:
                         rate=file_rate,
                         output=True
                     )
-                
-                self.logger.info(f"Playing audio: {filepath}")
                 
                 # Read and play audio in chunks
                 data = wf.readframes(self.chunk_size)

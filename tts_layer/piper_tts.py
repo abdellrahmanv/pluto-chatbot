@@ -85,45 +85,33 @@ class PiperTTS:
             # Use the found Piper executable
             piper_cmd = getattr(self, 'piper_executable', 'piper')
             
-            # Build Piper command - force raw output first
+            # Build Piper command - use standard WAV output
             cmd = [
                 piper_cmd,
                 '--model', self.model_path,
-                '--output-raw'  # Output raw audio
+                '--output_file', output_path
             ]
             
             # Only add config if file exists
             if os.path.exists(self.config_path):
                 cmd.extend(['--config', self.config_path])
             
-            # Add optional parameters
-            if self.speaker_id is not None:
-                cmd.extend(['--speaker', str(self.speaker_id)])
-            
             self.logger.debug(f"Piper command: {' '.join(cmd)}")
             
-            # Run Piper and get raw audio
+            # Run Piper with text input
             result = subprocess.run(
                 cmd,
-                input=text,
+                input=text.encode('utf-8'),
                 capture_output=True,
-                text=False,  # Binary output
                 timeout=30
             )
             
-            if result.returncode == 0:
-                # Convert raw audio to WAV with proper format
-                import wave
-                with wave.open(output_path, 'wb') as wf:
-                    wf.setnchannels(1)  # Mono
-                    wf.setsampwidth(2)  # 16-bit
-                    wf.setframerate(22050)  # Piper default sample rate
-                    wf.writeframes(result.stdout)
-                
+            if result.returncode == 0 and os.path.exists(output_path):
                 self.logger.info(f"Speech synthesized successfully: {output_path}")
                 return True
             else:
-                self.logger.error(f"Piper error: {result.stderr.decode() if result.stderr else 'Unknown error'}")
+                error_msg = result.stderr.decode() if result.stderr else 'Unknown error'
+                self.logger.error(f"Piper error: {error_msg}")
                 return False
         
         except FileNotFoundError:
