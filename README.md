@@ -308,15 +308,39 @@ sudo reboot
 
 ## Auto-Start on Boot
 
-To start Pluto automatically when Raspberry Pi boots:
+To make Pluto start automatically when Raspberry Pi boots:
 
 ```bash
-crontab -e
+cd ~/pluto-chatbot
+chmod +x setup_autostart.sh
+./setup_autostart.sh
 ```
 
-Add this line:
-```
-@reboot cd /home/pi/pluto-chatbot && source venv/bin/activate && python3 main.py >> logs/startup.log 2>&1
+This will create a systemd service that:
+- Waits for audio and network to be ready
+- Starts Pluto automatically on boot
+- Restarts Pluto if it crashes
+- Logs all output to system journal
+
+**Useful commands:**
+```bash
+# Start Pluto now
+sudo systemctl start pluto.service
+
+# Stop Pluto
+sudo systemctl stop pluto.service
+
+# Restart Pluto
+sudo systemctl restart pluto.service
+
+# Check status
+sudo systemctl status pluto.service
+
+# View live logs
+sudo journalctl -u pluto.service -f
+
+# Disable auto-start
+sudo systemctl disable pluto.service
 ```
 
 ## Performance Tips
