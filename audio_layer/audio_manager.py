@@ -144,26 +144,39 @@ class AudioManager:
             # Voice-activated recording with silence detection
             silence_chunks = 0
             max_silence_chunks = int(self.silence_duration * self.sample_rate / self.chunk_size)
+            speech_detected = False
+            min_speech_chunks = 5  # Minimum chunks before checking for silence
+            
+            self.logger.info("Listening for speech...")
             
             while True:
                 data = stream.read(self.chunk_size, exception_on_overflow=False)
                 frames.append(data)
                 
-                # Check for silence
-                if stop_on_silence:
-                    audio_data = np.frombuffer(data, dtype=np.int16)
-                    amplitude = np.abs(audio_data).mean()
-                    
-                    if amplitude < self.silence_threshold:
-                        silence_chunks += 1
-                        if silence_chunks >= max_silence_chunks:
-                            self.logger.info("Silence detected, stopping recording")
-                            break
-                    else:
-                        silence_chunks = 0
+                # Check audio level
+                audio_data = np.frombuffer(data, dtype=np.int16)
+                amplitude = np.abs(audio_data).mean()
+                
+                # Debug: show audio level every 10 chunks
+                if len(frames) % 10 == 0:
+                    self.logger.debug(f"Audio level: {amplitude:.0f} (threshold: {self.silence_threshold})")
+                
+                # Detect speech
+                if amplitude > self.silence_threshold:
+                    speech_detected = True
+                    silence_chunks = 0
+                    if len(frames) == 1:
+                        self.logger.info("Speech detected!")
+                elif speech_detected and len(frames) > min_speech_chunks:
+                    # Only count silence after speech has been detected
+                    silence_chunks += 1
+                    if silence_chunks >= max_silence_chunks:
+                        self.logger.info("Silence detected, stopping recording")
+                        break
                 
                 # Safety limit: max 30 seconds
                 if len(frames) > self.sample_rate / self.chunk_size * 30:
+                    self.logger.warning("Maximum recording time reached")
                     break
         
         stream.stop_stream()

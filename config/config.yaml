@@ -8,8 +8,8 @@ audio:
   channels: 1                       # Mono audio
   chunk_size: 1024                  # Audio buffer size
   record_seconds: 5                 # Duration to record for each voice command
-  silence_threshold: 500            # Amplitude threshold to detect silence
-  silence_duration: 2.0             # Seconds of silence before stopping recording
+  silence_threshold: 300            # Amplitude threshold to detect silence (lowered for better sensitivity)
+  silence_duration: 1.5             # Seconds of silence before stopping recording (reduced)
 
 # Whisper STT Settings
 whisper:
@@ -53,7 +53,7 @@ responses:
   
   fallback: "I didn't catch that. You can say 'fun fact' if you want to hear something interesting!"
   
-  startup: "Hello! I'm Pluto, your AI assistant. I'm ready to chat!"
+  startup: "Hi there! I am Pluto, an AI-powered welcoming robot."
   
   shutdown: "Goodbye! See you next time!"
 
