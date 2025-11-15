@@ -113,8 +113,8 @@ class PlutoChatbot:
         
         try:
             # Record audio - use fixed duration instead of silence detection
-            self.logger.info("\n🎤 Listening... (speak now, 4.5 seconds)")
-            audio_data = self.audio_manager.record_audio(duration=4.5, stop_on_silence=False)
+            self.logger.info("\n🎤 Listening... (speak now, 3.5 seconds)")
+            audio_data = self.audio_manager.record_audio(duration=3.5, stop_on_silence=False)
             
             # If no audio detected at all, share a fun fact
             if audio_data is None or len(audio_data) == 0:
