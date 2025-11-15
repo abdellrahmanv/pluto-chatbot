@@ -34,18 +34,35 @@ class PiperTTS:
     
     def _check_piper_installation(self):
         """Check if Piper is installed and accessible"""
-        try:
-            result = subprocess.run(
-                ['piper', '--version'],
-                capture_output=True,
-                text=True,
-                timeout=5
-            )
-            self.logger.info(f"Piper version: {result.stdout.strip()}")
-        except FileNotFoundError:
-            self.logger.warning("Piper not found in PATH. Make sure it's installed.")
-        except Exception as e:
-            self.logger.warning(f"Could not check Piper installation: {e}")
+        # Check multiple possible locations
+        possible_paths = [
+            'piper',
+            os.path.expanduser('~/piper/piper/piper'),
+            '/usr/local/bin/piper',
+            '/usr/bin/piper'
+        ]
+        
+        self.piper_executable = None
+        
+        for path in possible_paths:
+            try:
+                result = subprocess.run(
+                    [path, '--version'],
+                    capture_output=True,
+                    text=True,
+                    timeout=5
+                )
+                if result.returncode == 0:
+                    self.piper_executable = path
+                    self.logger.info(f"Piper found at: {path}")
+                    return
+            except (FileNotFoundError, PermissionError):
+                continue
+            except Exception as e:
+                continue
+        
+        self.logger.warning("Piper not found in standard locations. Will try default 'piper' command.")
+        self.piper_executable = 'piper'
     
     def synthesize(self, text: str, output_path: str) -> bool:
         """
@@ -65,17 +82,25 @@ class PiperTTS:
         self.logger.info(f"Synthesizing speech: '{text[:50]}...'")
         
         try:
+            # Use the found Piper executable
+            piper_cmd = getattr(self, 'piper_executable', 'piper')
+            
             # Build Piper command
             cmd = [
-                'piper',
+                piper_cmd,
                 '--model', self.model_path,
-                '--config', self.config_path,
                 '--output_file', output_path,
             ]
+            
+            # Only add config if file exists
+            if os.path.exists(self.config_path):
+                cmd.extend(['--config', self.config_path])
             
             # Add optional parameters
             if self.speaker_id is not None:
                 cmd.extend(['--speaker', str(self.speaker_id)])
+            
+            self.logger.debug(f"Piper command: {' '.join(cmd)}")
             
             # Run Piper
             result = subprocess.run(

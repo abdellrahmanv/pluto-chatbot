@@ -41,13 +41,31 @@ class AudioManager:
         device_count = self.audio.get_device_count()
         
         for i in range(device_count):
-            device_info = self.audio.get_device_info_by_index(i)
-            device_name = device_info.get('name', '')
-            
-            # Check if this is our USB device
-            if 'usb' in device_name.lower() or str(self.card_index) in device_name:
-                self.logger.info(f"Found USB audio device: {device_name} at index {i}")
-                return i
+            try:
+                device_info = self.audio.get_device_info_by_index(i)
+                device_name = device_info.get('name', '')
+                max_input = device_info.get('maxInputChannels', 0)
+                max_output = device_info.get('maxOutputChannels', 0)
+                
+                # Check if this is our USB device and has audio channels
+                if ('usb' in device_name.lower() or str(self.card_index) in device_name):
+                    if max_input > 0 or max_output > 0:
+                        self.logger.info(f"Found USB audio device: {device_name} at index {i}")
+                        return i
+            except Exception as e:
+                self.logger.debug(f"Error checking device {i}: {e}")
+                continue
+        
+        # If not found, try to find any device with both input and output
+        self.logger.warning(f"USB device Card {self.card_index} not found, searching for any usable device...")
+        for i in range(device_count):
+            try:
+                device_info = self.audio.get_device_info_by_index(i)
+                if device_info.get('maxInputChannels', 0) > 0 and device_info.get('maxOutputChannels', 0) > 0:
+                    self.logger.info(f"Using device: {device_info.get('name')} at index {i}")
+                    return i
+            except:
+                continue
         
         return None
     
