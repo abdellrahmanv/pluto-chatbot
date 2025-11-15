@@ -9,7 +9,7 @@ audio:
   chunk_size: 1024                  # Audio buffer size
   record_seconds: 5                 # Duration to record for each voice command
   silence_threshold: 300            # Amplitude threshold to detect silence (lowered for better sensitivity)
-  silence_duration: 1.5             # Seconds of silence before stopping recording (reduced)
+  silence_duration: 1.0             # Seconds of silence before stopping recording
 
 # Whisper STT Settings
 whisper:
