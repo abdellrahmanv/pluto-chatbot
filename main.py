@@ -112,9 +112,9 @@ class PlutoChatbot:
         temp_audio = None
         
         try:
-            # Record audio
-            self.logger.info("\n🎤 Listening... (speak now)")
-            audio_data = self.audio_manager.record_audio(stop_on_silence=True)
+            # Record audio - use fixed duration instead of silence detection
+            self.logger.info("\n🎤 Listening... (speak now, 4.5 seconds)")
+            audio_data = self.audio_manager.record_audio(duration=4.5, stop_on_silence=False)
             
             # Save to temporary file
             temp_audio = os.path.join(self.temp_dir, "input.wav")
