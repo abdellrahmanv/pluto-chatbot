@@ -148,11 +148,20 @@ If your USB device is not Card 3:
 
 ### Starting Pluto
 
+**Easy way (recommended):**
+```bash
+cd ~/pluto-chatbot
+./run_pluto.sh
+```
+
+**Manual way:**
 ```bash
 cd ~/pluto-chatbot
 source venv/bin/activate
 python3 main.py
 ```
+
+> **Important:** Always activate the virtual environment before running Pluto! The `run_pluto.sh` script does this automatically.
 
 ### Interacting with Pluto
 
