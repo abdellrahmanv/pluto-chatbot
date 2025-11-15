@@ -116,6 +116,13 @@ class PlutoChatbot:
             self.logger.info("\n🎤 Listening... (speak now, 4.5 seconds)")
             audio_data = self.audio_manager.record_audio(duration=4.5, stop_on_silence=False)
             
+            # If no audio detected at all, share a fun fact
+            if audio_data is None or len(audio_data) == 0:
+                self.logger.info("No audio detected, sharing a fun fact...")
+                response = self.scenario_manager.handle_scenario("fun_fact", "")
+                self.speak(response)
+                return
+            
             # Save to temporary file
             temp_audio = os.path.join(self.temp_dir, "input.wav")
             self.audio_manager.save_audio(audio_data, temp_audio)

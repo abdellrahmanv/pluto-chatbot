@@ -38,6 +38,11 @@ Restart=on-failure
 RestartSec=5
 StandardOutput=journal
 StandardError=journal
+Nice=-10
+IOSchedulingClass=realtime
+IOSchedulingPriority=0
+CPUSchedulingPolicy=fifo
+CPUSchedulingPriority=50
 
 [Install]
 WantedBy=multi-user.target
