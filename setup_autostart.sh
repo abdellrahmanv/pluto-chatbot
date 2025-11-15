@@ -32,8 +32,8 @@ Wants=network.target
 [Service]
 Type=simple
 User=pi
-WorkingDirectory=$PROJECT_DIR
-ExecStart=/bin/bash $PROJECT_DIR/run_pluto.sh
+WorkingDirectory=$SCRIPT_DIR
+ExecStart=/bin/bash $SCRIPT_DIR/run_pluto.sh
 Restart=on-failure
 RestartSec=5
 StandardOutput=journal
@@ -41,7 +41,6 @@ StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
-EOF
 EOF
 
 echo "✓ Service file created at /etc/systemd/system/pluto.service"
