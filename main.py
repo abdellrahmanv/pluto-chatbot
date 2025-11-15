@@ -93,9 +93,9 @@ class PlutoChatbot:
         self.logger.info("Step 1: Transcribing audio...")
         transcription = self.stt.transcribe(audio_path)
         
-        if not transcription:
-            self.logger.warning("Empty transcription")
-            return self.scenario_manager.get_response('unknown')
+        if not transcription or len(transcription.strip()) < 2:
+            self.logger.warning("Empty or unclear transcription, sharing fun fact")
+            return self.scenario_manager.get_response('fun_fact')
         
         # 2. Intent Detection
         self.logger.info("Step 2: Detecting intent...")
