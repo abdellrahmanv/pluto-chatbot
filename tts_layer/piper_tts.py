@@ -85,11 +85,11 @@ class PiperTTS:
             # Use the found Piper executable
             piper_cmd = getattr(self, 'piper_executable', 'piper')
             
-            # Build Piper command
+            # Build Piper command - force raw output first
             cmd = [
                 piper_cmd,
                 '--model', self.model_path,
-                '--output_file', output_path,
+                '--output-raw'  # Output raw audio
             ]
             
             # Only add config if file exists
@@ -102,20 +102,28 @@ class PiperTTS:
             
             self.logger.debug(f"Piper command: {' '.join(cmd)}")
             
-            # Run Piper
+            # Run Piper and get raw audio
             result = subprocess.run(
                 cmd,
                 input=text,
                 capture_output=True,
-                text=True,
+                text=False,  # Binary output
                 timeout=30
             )
             
             if result.returncode == 0:
+                # Convert raw audio to WAV with proper format
+                import wave
+                with wave.open(output_path, 'wb') as wf:
+                    wf.setnchannels(1)  # Mono
+                    wf.setsampwidth(2)  # 16-bit
+                    wf.setframerate(22050)  # Piper default sample rate
+                    wf.writeframes(result.stdout)
+                
                 self.logger.info(f"Speech synthesized successfully: {output_path}")
                 return True
             else:
-                self.logger.error(f"Piper error: {result.stderr}")
+                self.logger.error(f"Piper error: {result.stderr.decode() if result.stderr else 'Unknown error'}")
                 return False
         
         except FileNotFoundError:

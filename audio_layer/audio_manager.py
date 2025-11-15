@@ -187,11 +187,18 @@ class AudioManager:
         """Play audio file through speakers"""
         try:
             with wave.open(filepath, 'rb') as wf:
+                # Get file parameters
+                file_channels = wf.getnchannels()
+                file_rate = wf.getframerate()
+                file_width = wf.getsampwidth()
+                
+                self.logger.info(f"Playing audio: {filepath} (channels: {file_channels}, rate: {file_rate})")
+                
                 try:
                     stream = self.audio.open(
-                        format=self.audio.get_format_from_width(wf.getsampwidth()),
-                        channels=wf.getnchannels(),
-                        rate=wf.getframerate(),
+                        format=self.audio.get_format_from_width(file_width),
+                        channels=file_channels,  # Use file's channel count
+                        rate=file_rate,  # Use file's sample rate
                         output=True,
                         output_device_index=self.device_index
                     )
@@ -199,9 +206,9 @@ class AudioManager:
                     self.logger.warning(f"Failed to open output stream with device index: {e}")
                     self.logger.info("Trying default output device...")
                     stream = self.audio.open(
-                        format=self.audio.get_format_from_width(wf.getsampwidth()),
-                        channels=wf.getnchannels(),
-                        rate=wf.getframerate(),
+                        format=self.audio.get_format_from_width(file_width),
+                        channels=file_channels,
+                        rate=file_rate,
                         output=True
                     )
                 
