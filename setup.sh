@@ -81,11 +81,11 @@ cd ~/piper
 
 # Download Piper (ARM64 version for Raspberry Pi 4B)
 echo "Downloading Piper TTS..."
-wget https://github.com/rhasspy/piper/releases/download/v1.2.0/piper_arm64.tar.gz
+wget https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_aarch64.tar.gz
 
 # Extract
 echo "Extracting Piper..."
-tar -xzf piper_arm64.tar.gz
+tar -xzf piper_linux_aarch64.tar.gz
 
 # Make executable
 chmod +x piper/piper
@@ -105,8 +105,8 @@ cd ~/piper/models
 
 # Download English voice model (lessac - good quality, medium size)
 echo "Downloading voice model..."
-wget https://github.com/rhasspy/piper/releases/download/v1.2.0/en_US-lessac-medium.onnx
-wget https://github.com/rhasspy/piper/releases/download/v1.2.0/en_US-lessac-medium.onnx.json
+wget https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx
+wget https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json
 
 echo ""
 echo -e "${GREEN}Step 10: Configuring audio device (Card 3)...${NC}"
