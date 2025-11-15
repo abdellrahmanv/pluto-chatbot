@@ -18,6 +18,10 @@ class AudioManager:
         """Initialize audio manager with configuration"""
         self.logger = logging.getLogger(__name__)
         
+        # Suppress ALSA warnings
+        import os
+        os.environ['ALSA_CARD'] = 'default'
+        
         # Load configuration
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)
@@ -29,6 +33,18 @@ class AudioManager:
         self.card_index = self.audio_config['card_index']
         self.silence_threshold = self.audio_config['silence_threshold']
         self.silence_duration = self.audio_config['silence_duration']
+        
+        # Redirect ALSA errors to /dev/null
+        try:
+            from ctypes import CFUNCTYPE, c_char_p, c_int, cdll
+            ERROR_HANDLER_FUNC = CFUNCTYPE(None, c_char_p, c_int, c_char_p, c_int, c_char_p)
+            def py_error_handler(filename, line, function, err, fmt):
+                pass
+            c_error_handler = ERROR_HANDLER_FUNC(py_error_handler)
+            asound = cdll.LoadLibrary('libasound.so.2')
+            asound.snd_lib_error_set_handler(c_error_handler)
+        except:
+            pass  # If suppression fails, continue anyway
         
         self.audio = pyaudio.PyAudio()
         self.device_index = self._find_usb_device()
@@ -94,15 +110,27 @@ class AudioManager:
         """
         frames = []
         
-        # Open stream
-        stream = self.audio.open(
-            format=pyaudio.paInt16,
-            channels=self.channels,
-            rate=self.sample_rate,
-            input=True,
-            input_device_index=self.device_index,
-            frames_per_buffer=self.chunk_size
-        )
+        # Open stream with error handling
+        try:
+            stream = self.audio.open(
+                format=pyaudio.paInt16,
+                channels=self.channels,
+                rate=self.sample_rate,
+                input=True,
+                input_device_index=self.device_index,
+                frames_per_buffer=self.chunk_size,
+                stream_callback=None
+            )
+        except Exception as e:
+            self.logger.error(f"Failed to open audio stream: {e}")
+            self.logger.info("Trying with default device...")
+            stream = self.audio.open(
+                format=pyaudio.paInt16,
+                channels=self.channels,
+                rate=self.sample_rate,
+                input=True,
+                frames_per_buffer=self.chunk_size
+            )
         
         self.logger.info("Recording started...")
         
@@ -159,13 +187,23 @@ class AudioManager:
         """Play audio file through speakers"""
         try:
             with wave.open(filepath, 'rb') as wf:
-                stream = self.audio.open(
-                    format=self.audio.get_format_from_width(wf.getsampwidth()),
-                    channels=wf.getnchannels(),
-                    rate=wf.getframerate(),
-                    output=True,
-                    output_device_index=self.device_index
-                )
+                try:
+                    stream = self.audio.open(
+                        format=self.audio.get_format_from_width(wf.getsampwidth()),
+                        channels=wf.getnchannels(),
+                        rate=wf.getframerate(),
+                        output=True,
+                        output_device_index=self.device_index
+                    )
+                except Exception as e:
+                    self.logger.warning(f"Failed to open output stream with device index: {e}")
+                    self.logger.info("Trying default output device...")
+                    stream = self.audio.open(
+                        format=self.audio.get_format_from_width(wf.getsampwidth()),
+                        channels=wf.getnchannels(),
+                        rate=wf.getframerate(),
+                        output=True
+                    )
                 
                 self.logger.info(f"Playing audio: {filepath}")
                 
