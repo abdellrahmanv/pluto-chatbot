@@ -119,7 +119,7 @@ class PlutoChatbot:
             # If no audio detected at all, share a fun fact
             if audio_data is None or len(audio_data) == 0:
                 self.logger.info("No audio detected, sharing a fun fact...")
-                response = self.scenario_manager.handle_scenario("fun_fact", "")
+                response = self.scenario_manager.get_response("fun_fact")
                 self.speak(response)
                 return
             
