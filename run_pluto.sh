@@ -30,6 +30,15 @@ fi
 echo "Activating virtual environment..."
 source venv/bin/activate
 
+# Wait for audio devices to be ready (especially important on boot)
+echo "Checking audio devices..."
+sleep 2
+
+# List available audio devices
+echo "Available audio devices:"
+aplay -l 2>/dev/null || echo "Warning: Could not list audio devices"
+echo ""
+
 # Verify critical packages
 echo "Checking dependencies..."
 python3 -c "import whisper" 2>/dev/null
